@@ -7,16 +7,32 @@ export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
+  const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({ status: '', assignedUser: '', tags: [] });
+  const [filter, setFilter] = useState({
+    status: '',
+    assignedUser: '',
+    tags: [],
+    searchText: '' // Added for text-based search
+  });
 
   useEffect(() => {
     const loadTasks = async () => {
       try {
         const taskList = await fetchTasks();
-        console.log(JSON.stringify(taskList));
         setTasks(taskList);
+
+        const allTags = taskList.reduce((acc, task) => {
+          task.tags.forEach(tag => {
+            if (!acc.includes(tag)) {
+              acc.push(tag);
+            }
+          });
+          return acc;
+        }, []);
+
+        setTags(allTags);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -77,10 +93,13 @@ export const TaskProvider = ({ children }) => {
   };
 
   const filteredTasks = tasks.filter(task => {
+    const matchesText = task.title.toLowerCase().includes(filter.searchText.toLowerCase()) || 
+                        task.description.toLowerCase().includes(filter.searchText.toLowerCase());
     return (
+      matchesText &&
       (!filter.status || task.status === filter.status) &&
       (!filter.assignedUser || task.assignedUsers.includes(filter.assignedUser)) &&
-      (!filter.tags.length || filter.tags.every(tag => task.tags.includes(tag)))
+      (!filter.tags.length || filter.tags.some(tag => task.tags.includes(tag)))
     );
   });
 
@@ -90,6 +109,7 @@ export const TaskProvider = ({ children }) => {
         tasks: filteredTasks,
         loading,
         error,
+        tags,
         handleCreateTask,
         handleUpdateTask,
         handleDeleteTask,

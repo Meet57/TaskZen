@@ -19,7 +19,9 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <TaskProvider>
             <Navbar />
-            <main>{children}</main>
+            <div className="max-w-screen-xl mx-auto p-4">
+              {children}
+            </div>
           </TaskProvider>
         </AuthProvider>
       </body>
