@@ -1,6 +1,5 @@
 // src/app/api.js
 import PocketBase from 'pocketbase';
-import setup, { createTaskfummy, createUser, setupData } from './setup';
 
 const POCKETBASE_URL = process.env.POCKETBASE_URL || "http://localhost:8090";
 
@@ -46,6 +45,15 @@ export const register = async (email, password) => {
     return newUser;
   } catch (error) {
     throw new Error('Registration failed.');
+  }
+};
+
+export const getUserDetails = async () => {
+  try {
+    const users = await pocketbase.collection('users').getFullList();    
+    return users;
+  } catch (error) {
+    throw new Error('Failed to fetch users.');
   }
 };
 

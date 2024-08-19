@@ -2,20 +2,36 @@
 "use client";
 
 import React, { createContext, useState, useEffect } from 'react';
-import { login, logout, checkSession, register, forgotPassword } from '../api';
+import { login, logout, checkSession, register, forgotPassword, getUserDetails } from '../api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children, router }) => {
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        let users = await userDetails();
+        console.log(users);
+        
+        setUsers(users);
+      } catch (error) {
+        setError(error.message);
+      }
+      setError(null);
+    };
+
+    loadUsers();
+
     const validateSession = async () => {
       try {
         const session = await checkSession();
+        console.log(session, 'session');
         if (session) {
           setUser(session.user);
           setIsAuthenticated(true);
@@ -33,6 +49,7 @@ export const AuthProvider = ({ children, router }) => {
   const handleLogin = async (email, password) => {
     try {
       const authData = await login(email, password);
+      console.log(authData);
       setUser(authData.user);
       setIsAuthenticated(true);
       if (router) router.push('/');
@@ -59,6 +76,22 @@ export const AuthProvider = ({ children, router }) => {
     }
   };
 
+  const userDetails = async () => {
+    try {
+      let users = await getUserDetails();
+      console.log(users);
+      
+      return users.map(user => ({
+        username: user.username,
+        name: user.name,
+        id: user.id,
+        email: user.email
+      }));
+    } catch (error) {
+      throw new Error('Failed to fetch users.');
+    }
+  }
+
   const handleForgotPassword = async (email) => {
     try {
       await forgotPassword(email);
@@ -74,6 +107,8 @@ export const AuthProvider = ({ children, router }) => {
         isAuthenticated,
         loading,
         error,
+        users,
+        userDetails,
         handleLogin,
         handleLogout,
         handleRegister,

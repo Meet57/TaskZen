@@ -1,12 +1,23 @@
-"use client"; // Ensure this component is client-side
+"use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { Drawer, Button } from 'antd';
+import CreateTaskForm from './CreateTaskForm'; // Make sure you have this form component
 
 const Navbar = () => {
   const { isAuthenticated, handleLogout } = useContext(AuthContext);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const showDrawer = () => {
+    setDrawerVisible(true);
+  };
+
+  const onClose = () => {
+    setDrawerVisible(false);
+  };
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -26,7 +37,7 @@ const Navbar = () => {
               <Link href="/" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" aria-current="page">Home</Link>
             </li>
             <li>
-              <Link href="/create-task" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Create Tasks</Link>
+              <button onClick={showDrawer} className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Create Task</button>
             </li>
             {isAuthenticated ? (
               <li>
@@ -34,12 +45,23 @@ const Navbar = () => {
               </li>
             ) : (
               <li>
-                <Link href="/login" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login</Link>
+                <Link href="/auth/login" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login</Link>
               </li>
             )}
           </ul>
         </div>
       </div>
+
+      {/* Drawer for Create Task Form */}
+      <Drawer
+        title="Create Task"
+        placement="right"
+        onClose={onClose}
+        open={drawerVisible}
+        width={700}
+      >
+        <CreateTaskForm onClose={onClose} />
+      </Drawer>
     </nav>
   );
 };
