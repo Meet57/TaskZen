@@ -3,15 +3,18 @@
 
 import React, { createContext, useState, useEffect } from 'react';
 import { login, logout, checkSession, register, forgotPassword, getUserDetails } from '../api';
+import { useRouter } from 'next/navigation';
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children, router }) => {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -48,6 +51,7 @@ export const AuthProvider = ({ children, router }) => {
 
   const handleLogin = async (email, password) => {
     try {
+      setLoading(true);
       const authData = await login(email, password);
       console.log(authData);
       setUser(authData.user);
@@ -56,6 +60,7 @@ export const AuthProvider = ({ children, router }) => {
     } catch (error) {
       setError(error.message);
     }
+    setLoading(false);
   };
 
   const handleLogout = async () => {
