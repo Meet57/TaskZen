@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 const { Title, Paragraph } = Typography;
 
 const RegisterPage = () => {
-  const { handleRegister, error, loading } = useContext(AuthContext);
+  const { handleRegister, loading } = useContext(AuthContext);
   const router = useRouter();
   const [form] = Form.useForm();
   const [name, setName] = useState('');
@@ -21,13 +21,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <Card
-        style={{ maxWidth: '600px', width: '100%', marginTop: '30px',padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+        style={{ maxWidth: '600px', width: '100%', marginTop: '30px', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
         bordered={false}
       >
         <Title level={2} style={{ textAlign: 'center', marginBottom: '1rem' }}>Register</Title>
-        {error && <Alert message={error} type="error" showIcon />}
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Row gutter={16}>
             <Col span={12}>
@@ -48,7 +47,7 @@ const RegisterPage = () => {
             <Col span={12}>
               {/* Email */}
               <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Please enter your email' }]}>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} />
               </Form.Item>
             </Col>
             <Col span={12}>

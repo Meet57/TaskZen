@@ -1,9 +1,9 @@
-// src/app/context/AuthContext.js
 "use client";
 
 import React, { createContext, useState, useEffect } from 'react';
-import { login, logout, checkSession, register, forgotPassword, getUserDetails } from '../api';
+import { login, logout, checkSession, registerUser, forgotPassword, getUserDetails } from '../api';
 import { useRouter } from 'next/navigation';
+import { notification } from 'antd';
 
 export const AuthContext = createContext();
 
@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const router = useRouter();
 
@@ -21,44 +20,51 @@ export const AuthProvider = ({ children }) => {
       try {
         let users = await userDetails();
         console.log(users);
-        
         setUsers(users);
       } catch (error) {
-        setError(error.message);
+        notification.error({
+          message: 'Error',
+          description: error.message,
+        });
       }
-      setError(null);
     };
 
     loadUsers();
 
-    const validateSession = async () => {
-      try {
-        const session = await checkSession();
-        console.log(session, 'session');
-        if (session) {
-          setUser(session.user);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // const validateSession = async () => {
+    //   try {
+    //     const session = await checkSession();
+    //     console.log(session, 'session');
+    //     if (session) {
+    //       setUser(session.user);
+    //       setIsAuthenticated(true);
+    //     }
+    //   } catch (error) {
+    //     notification.error({
+    //       message: 'Session Error',
+    //       description: error.message,
+    //     });
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
-    validateSession();
+    // validateSession();
   }, []);
 
   const handleLogin = async (email, password) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const authData = await login(email, password);
       console.log(authData);
       setUser(authData.user);
       setIsAuthenticated(true);
       if (router) router.push('/');
     } catch (error) {
-      setError(error.message);
+      notification.error({
+        message: 'Login Error',
+        description: error.message,
+      });
     }
     setLoading(false);
   };
@@ -70,22 +76,25 @@ export const AuthProvider = ({ children }) => {
     if (router) router.push('/auth/login');
   };
 
-  const handleRegister = async (email, password) => {
+  const handleRegister = async (name, username, email, password) => {
+    setLoading(true);
     try {
-      const newUser = await register(email, password);
-      setUser(newUser);
-      setIsAuthenticated(true);
-      if (router) router.push('/');
+      await registerUser(name, username, email, password);
+      // Handle post-registration logic here (e.g., redirect to login page)
+      if (router) router.push('/auth/login');
     } catch (error) {
-      setError(error.message);
+      notification.error({
+        message: 'Registration Error',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const userDetails = async () => {
     try {
       let users = await getUserDetails();
-      console.log(users);
-      
       return users.map(user => ({
         username: user.username,
         name: user.name,
@@ -101,7 +110,10 @@ export const AuthProvider = ({ children }) => {
     try {
       await forgotPassword(email);
     } catch (error) {
-      setError(error.message);
+      notification.error({
+        message: 'Forgot Password Error',
+        description: error.message,
+      });
     }
   };
 
@@ -111,7 +123,6 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         loading,
-        error,
         users,
         userDetails,
         handleLogin,

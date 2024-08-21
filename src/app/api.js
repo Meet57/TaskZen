@@ -35,16 +35,20 @@ export const logout = async () => {
   pocketbase.authStore.clear();
 };
 
-export const register = async (email, password) => {
+export const registerUser = async (username, email, password, name) => {
   try {
-    const newUser = await pocketbase.collection('users').create({
+    const response = await pocketbase.collection('users').create({
+      username,
       email,
       password,
+      name,
+      emailVisibility: true,
       passwordConfirm: password,
     });
-    return newUser;
+    return response.data;
   } catch (error) {
-    throw new Error('Registration failed.');
+    console.log(error);
+    throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
 

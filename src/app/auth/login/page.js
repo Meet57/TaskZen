@@ -26,7 +26,6 @@ const LoginPage = () => {
         bordered={false}
       >
         <Title level={2} style={{ textAlign: 'center', marginBottom: '1rem' }}>Login</Title>
-        {error && <Alert message={error} type="error" showIcon />}
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Please enter your email' }]}>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
