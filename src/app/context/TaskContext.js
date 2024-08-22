@@ -1,6 +1,16 @@
 "use client";
-import React, { createContext, useState, useEffect } from 'react';
-import { fetchTasks, fetchTaskById, createTask, updateTask, deleteTask,fetchCommentsByTaskId, addComment, editComment, deleteComment } from '../api';
+import React, { createContext, useState, useEffect } from "react";
+import {
+  fetchTasks,
+  fetchTaskById,
+  createTask,
+  updateTask,
+  deleteTask,
+  fetchCommentsByTaskId,
+  addComment,
+  editComment,
+  deleteComment,
+} from "../api";
 
 export const TaskContext = createContext();
 
@@ -10,10 +20,10 @@ export const TaskProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({
-    status: '',
-    assignedUser: '',
+    status: "",
+    assignedUser: "",
     tags: [],
-    searchText: ''
+    searchText: "",
   });
 
   useEffect(() => {
@@ -23,7 +33,7 @@ export const TaskProvider = ({ children }) => {
         setTasks(taskList);
 
         const allTags = taskList.reduce((acc, task) => {
-          task.tags.forEach(tag => {
+          task.tags.forEach((tag) => {
             if (!acc.includes(tag)) {
               acc.push(tag);
             }
@@ -54,7 +64,7 @@ export const TaskProvider = ({ children }) => {
   const handleUpdateTask = async (taskId, updates) => {
     try {
       const updatedTask = await updateTask(taskId, updates);
-      setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+      setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }
@@ -63,7 +73,7 @@ export const TaskProvider = ({ children }) => {
   const handleDeleteTask = async (taskId) => {
     try {
       await deleteTask(taskId);
-      setTasks(tasks.filter(task => task.id !== taskId));
+      setTasks(tasks.filter((task) => task.id !== taskId));
     } catch (error) {
       setError(error.message);
     }
@@ -87,8 +97,20 @@ export const TaskProvider = ({ children }) => {
 
   const handleAddComment = async (taskId, commentText) => {
     try {
-      const updatedTask = await addComment(taskId, commentText);
-      setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+      const user = JSON.parse(sessionStorage.getItem("auth"));
+      console.log({
+        taskId,
+        commentText,
+        name: user.username,
+        nname: user.name,
+      });
+      const updatedTask = await addComment(
+        taskId,
+        commentText,
+        user.user.username,
+        user.user.name
+      );
+      setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }
@@ -97,7 +119,7 @@ export const TaskProvider = ({ children }) => {
   const handleEditComment = async (taskId, commentId, newText) => {
     try {
       const updatedTask = await editComment(taskId, commentId, newText);
-      setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+      setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }
@@ -105,8 +127,8 @@ export const TaskProvider = ({ children }) => {
 
   const handleDeleteComment = async (taskId, commentId) => {
     try {
-      const updatedTask = await deleteComment(taskId, commentId);
-      setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+      const updatedTask = await deleteComment(commentId);
+      setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }
@@ -116,15 +138,22 @@ export const TaskProvider = ({ children }) => {
     setFilter(filterCriteria);
   };
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesText = task.title.toLowerCase().includes(filter.searchText.toLowerCase()) || 
-                        task.description.toLowerCase().includes(filter.searchText.toLowerCase());
-    return (
-      matchesText &&
-      (!filter.status || task.status === filter.status) &&
-      (!filter.assignedUser || task.assignedUsers.includes(filter.assignedUser)) &&
-      (!filter.tags.length || filter.tags.some(tag => task.tags.includes(tag)))
-    );
+  const filteredTasks = tasks.filter((task) => {
+    if (task) {
+      const matchesText =
+        task.title.toLowerCase().includes(filter.searchText.toLowerCase()) ||
+        task.description
+          .toLowerCase()
+          .includes(filter.searchText.toLowerCase());
+      return (
+        matchesText &&
+        (!filter.status || task.status === filter.status) &&
+        (!filter.assignedUser ||
+          task.assignedUsers.includes(filter.assignedUser)) &&
+        (!filter.tags.length ||
+          filter.tags.some((tag) => task.tags.includes(tag)))
+      );
+    }
   });
 
   return (

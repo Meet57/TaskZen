@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
     const loadUsers = async () => {
       try {
         let users = await userDetails();
-        console.log(users);
         setUsers(users);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -31,7 +30,6 @@ export const AuthProvider = ({ children }) => {
     const validateSession = async () => {
       try {
         const session = await checkSession();
-        console.log(session, 'session');
         if (session) {
           setUser(session.user);
           setIsAuthenticated(true);
@@ -51,7 +49,6 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const authData = await login(email, password);
-      console.log(authData);
       setUser(authData.user);
       setIsAuthenticated(true);
       sessionStorage.setItem('auth', JSON.stringify(authData));

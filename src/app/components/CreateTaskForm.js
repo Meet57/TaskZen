@@ -12,8 +12,7 @@ const CreateTaskForm = ({ onClose }) => {
   const { tags } = useContext(TaskContext);
 
   const handleFinish = (values) => {
-    console.log('Form Values:', values);
-    onClose(); // Close drawer after submission
+    onClose();
   };
 
   const handleClear = () => {

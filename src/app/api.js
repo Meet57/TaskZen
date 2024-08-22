@@ -45,10 +45,8 @@ export const registerUser = async (username, email, password, name) => {
       emailVisibility: true,
       passwordConfirm: password,
     });
-    console.log(response);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
@@ -126,11 +124,13 @@ export const fetchCommentsByTaskId = async (taskId) => {
   }
 };
 
-export const addComment = async (taskId, commentText, owner) => {
+export const addComment = async (taskId, commentText, username, name) => {
   try {
+    console.log({ taskId, commentText, username, name });
     const newComment = {
       taskId,
-      owner,
+      username,
+      name,
       content: commentText,
     };
     const response = await pocketbase.collection('comments').create(newComment);

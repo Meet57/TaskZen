@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState, useContext } from 'react';
-import { Card, Typography, Tag, Button, Input, List, Avatar } from 'antd';
+import { Card, Typography, Tag, Button, Input, List, Avatar, Popconfirm } from 'antd';
 import { TaskContext } from '../../context/TaskContext';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -13,36 +13,13 @@ const TaskDetails = () => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const { id } = useParams();
-
-  // Dummy comments data for testing
-  const dummyComments = [
-    {
-      id: '1',
-      taskId: 'task1',
-      owner: 'Alice Johnson',
-      content: 'This task is progressing well. We should complete it by the end of the week.'
-    },
-    {
-      id: '2',
-      taskId: 'task1',
-      owner: 'Bob Smith',
-      content: 'I’ve encountered a minor issue. Will update you once I resolve it.'
-    },
-    {
-      id: '3',
-      taskId: 'task1',
-      owner: 'Charlie Davis',
-      content: 'Looking forward to the demo on Friday. Everything seems to be on track.'
-    }
-  ];
+  const router = useRouter();
 
   useEffect(() => {
     if (id) {
       fetchTaskById(id).then(setTask);
-      // Simulate fetching comments data
-      setComments(dummyComments);
       // If you are using real API
-      // fetchCommentsByTaskId(id).then(setComments);
+      fetchCommentsByTaskId(id).then(setComments);
     }
   }, [id]);
 
@@ -50,33 +27,19 @@ const TaskDetails = () => {
     if (commentText.trim()) {
       await addComment(id, commentText);
       setCommentText('');
-      // Simulate adding a new comment
-      const newComment = {
-        id: (comments.length + 1).toString(),
-        taskId: id,
-        owner: 'New User', // Replace with dynamic user info
-        content: commentText
-      };
-      setComments([...comments, newComment]);
-      // If using real API
-      // fetchCommentsByTaskId(id).then(setComments);
+      fetchCommentsByTaskId(id).then(setComments);
     }
   };
 
   const handleDeleteComment = async (commentId) => {
     await deleteComment(id, commentId);
-    // Simulate deleting a comment
-    setComments(comments.filter(comment => comment.id !== commentId));
-    // If using real API
-    // fetchCommentsByTaskId(id).then(setComments);
+    fetchCommentsByTaskId(id).then(setComments);
   };
 
   const handleEditComment = async (commentId, newText) => {
     await editComment(id, commentId, newText);
     // Simulate editing a comment
-    setComments(comments.map(comment => comment.id === commentId ? { ...comment, content: newText } : comment));
-    // If using real API
-    // fetchCommentsByTaskId(id).then(setComments);
+    fetchCommentsByTaskId(id).then(setComments);
   };
 
   return (
@@ -108,12 +71,20 @@ const TaskDetails = () => {
             renderItem={(comment) => (
               <List.Item
                 actions={[
-                  <Button type="link" danger onClick={() => handleDeleteComment(comment.id)}>🗑️</Button>,
+                  <Popconfirm
+                    title="Are you sure you want to delete this comment?"
+                    onConfirm={() => handleDeleteComment(comment.id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button type="link" danger>🗑️</Button>
+                  </Popconfirm>
+                  // <Button type="link" danger onClick={() => handleEditComment(comment.id)}>📝</Button>,
                 ]}
               >
                 <List.Item.Meta
-                  avatar={<Avatar>{comment.owner.charAt(0) + comment.owner.charAt(comment.owner.length - 1)}</Avatar>}
-                  title={comment.owner}
+                  avatar={<Avatar>{comment.name ? comment.name.split(' ').slice(0,2).map(name => name[0]).join(''): "N/A"}</Avatar>}
+                  title={comment.name}
                   description={comment.content}
                 />
               </List.Item>

@@ -1,9 +1,13 @@
 // components/TaskCard.js
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { notification } from "antd";
 
 const TaskCard = ({ task }) => {
   const { title, description, priority, status, tags, assignedTo } = task;
+
+  const router = useRouter();
 
   // Priority and Status color mapping
   const priorityColors = {
@@ -17,6 +21,14 @@ const TaskCard = ({ task }) => {
     "In Progress": "bg-yellow-300 text-yellow-800",
     Done: "bg-green-300 text-green-800",
   };
+
+  const routeToTask = (taskId) => {
+    if(!sessionStorage.getItem('auth')){
+      notification.error({ message: 'Unauthorized Access', description: 'Please login to view task details' });
+    }else{
+      router.push(`/task/${taskId}`);
+    }
+  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col relative">
@@ -65,9 +77,9 @@ const TaskCard = ({ task }) => {
 
       {/* Link */}
       <div className="mt-4 text-right">
-        <Link href={`/task/${task.id}`}>
+        <div onClick={() => routeToTask(task.id)} className="cursor-pointer">
           <div className="text-blue-600 hover:underline">More details</div>
-        </Link>
+        </div>
       </div>
     </div>
   );
