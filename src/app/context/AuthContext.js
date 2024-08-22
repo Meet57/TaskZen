@@ -22,34 +22,29 @@ export const AuthProvider = ({ children }) => {
         console.log(users);
         setUsers(users);
       } catch (error) {
-        notification.error({
-          message: 'Error',
-          description: error.message,
-        });
+        console.error('Failed to fetch users:', error);
       }
     };
 
     loadUsers();
 
-    // const validateSession = async () => {
-    //   try {
-    //     const session = await checkSession();
-    //     console.log(session, 'session');
-    //     if (session) {
-    //       setUser(session.user);
-    //       setIsAuthenticated(true);
-    //     }
-    //   } catch (error) {
-    //     notification.error({
-    //       message: 'Session Error',
-    //       description: error.message,
-    //     });
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
+    const validateSession = async () => {
+      try {
+        const session = await checkSession();
+        console.log(session, 'session');
+        if (session) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+        }
+        sessionStorage.setItem('auth', JSON.stringify(session));
+      } catch (error) {
+        console.error('Failed to validate session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // validateSession();
+    validateSession();
   }, []);
 
   const handleLogin = async (email, password) => {
@@ -59,6 +54,7 @@ export const AuthProvider = ({ children }) => {
       console.log(authData);
       setUser(authData.user);
       setIsAuthenticated(true);
+      sessionStorage.setItem('auth', JSON.stringify(authData));
       if (router) router.push('/');
     } catch (error) {
       notification.error({
@@ -73,14 +69,14 @@ export const AuthProvider = ({ children }) => {
     await logout();
     setUser(null);
     setIsAuthenticated(false);
+    sessionStorage.removeItem('auth');
     if (router) router.push('/auth/login');
   };
 
-  const handleRegister = async (name, username, email, password) => {
+  const handleRegister = async (username, email, password, name) => {
     setLoading(true);
     try {
-      await registerUser(name, username, email, password);
-      // Handle post-registration logic here (e.g., redirect to login page)
+      await registerUser(username, email, password, name);
       if (router) router.push('/auth/login');
     } catch (error) {
       notification.error({

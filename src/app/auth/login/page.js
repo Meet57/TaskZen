@@ -40,10 +40,7 @@ const LoginPage = () => {
           </Form.Item>
         </Form>
         <p style={{ textAlign: 'center' }}>
-          Don't have an account? <Link href='/auth/register'>Register</Link>
-        </p>
-        <p style={{ textAlign: 'center' }}>
-          Forgot your password? <Link href='/auth/forgot-password'>Reset it</Link>
+          Don't have an account? <Link className='text-blue-700 hover:text-blue-900 hover:underline' href='/auth/register'>Register</Link>
         </p>
       </Card>
     </div>

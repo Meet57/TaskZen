@@ -45,6 +45,7 @@ export const registerUser = async (username, email, password, name) => {
       emailVisibility: true,
       passwordConfirm: password,
     });
+    console.log(response);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -105,27 +106,51 @@ export const deleteTask = async (taskId) => {
   }
 };
 
-export const addComment = async (taskId, comment) => {
+export const fetchTaskById = async (taskId) => {
   try {
-    const updatedTask = await pocketbase.collection('tasks').update(taskId, {
-      $push: { comments: comment },
+    const task = await pocketbase.collection('tasks').getOne(taskId);
+    return task;
+  } catch (error) {
+    throw new Error('Failed to fetch task details.');
+  }
+};
+
+export const fetchCommentsByTaskId = async (taskId) => {
+  try {
+    const comments = await pocketbase.collection('comments').getFullList({
+      filter: `taskId = '${taskId}'`
     });
-    return updatedTask;
+    return comments;
+  } catch (error) {
+    throw new Error('Failed to fetch comments.');
+  }
+};
+
+export const addComment = async (taskId, commentText, owner) => {
+  try {
+    const newComment = {
+      taskId,
+      owner,
+      content: commentText,
+    };
+    const response = await pocketbase.collection('comments').create(newComment);
+    return response.data;
   } catch (error) {
     throw new Error('Failed to add comment.');
   }
 };
 
-export const editComment = async (taskId, commentId, updatedComment) => {
+export const deleteComment = async (commentId) => {
   try {
-    const task = await pocketbase.collection('tasks').getOne(taskId);
-    const updatedComments = task.comments.map((comment) =>
-      comment.id === commentId ? { ...comment, text: updatedComment } : comment
-    );
-    const updatedTask = await pocketbase.collection('tasks').update(taskId, {
-      comments: updatedComments,
-    });
-    return updatedTask;
+    await pocketbase.collection('comments').delete(commentId);
+  } catch (error) {
+    throw new Error('Failed to delete comment.');
+  }
+};
+
+export const editComment = async (commentId, newText) => {
+  try {
+    await pocketbase.collection('comments').update(commentId, { content: newText });
   } catch (error) {
     throw new Error('Failed to edit comment.');
   }

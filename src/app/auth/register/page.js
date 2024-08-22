@@ -4,6 +4,7 @@ import React, { useContext, useState } from 'react';
 import { Form, Input, Button, Alert, Card, Typography, Row, Col } from 'antd';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const { Title, Paragraph } = Typography;
 
@@ -17,7 +18,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
 
   const onFinish = () => {
-    handleRegister(name, username, email, password);
+    handleRegister(username, email, password, name);
   };
 
   return (
@@ -67,7 +68,7 @@ const RegisterPage = () => {
         </Form>
 
         <Paragraph style={{ textAlign: 'center' }}>
-          Already have an account? <a onClick={() => router.push('/auth/login')}>Login</a>
+          Already have an account? <Link  className='text-blue-700 hover:text-blue-900 hover:underline' href='/auth/login'>Login</Link>
         </Paragraph>
       </Card>
     </div>

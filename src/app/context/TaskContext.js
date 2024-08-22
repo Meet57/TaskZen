@@ -1,7 +1,6 @@
-// src/app/context/TaskContext.js
 "use client";
 import React, { createContext, useState, useEffect } from 'react';
-import { fetchTasks, createTask, updateTask, deleteTask, addComment, editComment } from '../api';
+import { fetchTasks, fetchTaskById, createTask, updateTask, deleteTask,fetchCommentsByTaskId, addComment, editComment, deleteComment } from '../api';
 
 export const TaskContext = createContext();
 
@@ -14,7 +13,7 @@ export const TaskProvider = ({ children }) => {
     status: '',
     assignedUser: '',
     tags: [],
-    searchText: '' // Added for text-based search
+    searchText: ''
   });
 
   useEffect(() => {
@@ -70,18 +69,43 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
-  const handleAddComment = async (taskId, comment) => {
+  const fetchTaskByID = async (taskId) => {
     try {
-      const updatedTask = await addComment(taskId, comment);
+      return await fetchTaskById(taskId);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const fetchCommentsByTaskID = async (taskId) => {
+    try {
+      return await fetchCommentsByTaskId(taskId);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleAddComment = async (taskId, commentText) => {
+    try {
+      const updatedTask = await addComment(taskId, commentText);
       setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }
   };
 
-  const handleEditComment = async (taskId, commentId, updatedComment) => {
+  const handleEditComment = async (taskId, commentId, newText) => {
     try {
-      const updatedTask = await editComment(taskId, commentId, updatedComment);
+      const updatedTask = await editComment(taskId, commentId, newText);
+      setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleDeleteComment = async (taskId, commentId) => {
+    try {
+      const updatedTask = await deleteComment(taskId, commentId);
       setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
@@ -113,8 +137,11 @@ export const TaskProvider = ({ children }) => {
         handleCreateTask,
         handleUpdateTask,
         handleDeleteTask,
-        handleAddComment,
-        handleEditComment,
+        fetchTaskById: fetchTaskByID,
+        fetchCommentsByTaskId: fetchCommentsByTaskID,
+        addComment: handleAddComment,
+        editComment: handleEditComment,
+        deleteComment: handleDeleteComment,
         handleFilterTasks,
       }}
     >
