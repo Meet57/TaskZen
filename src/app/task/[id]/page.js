@@ -11,10 +11,12 @@ import {
   List,
   Avatar,
   Popconfirm,
+  Modal,
 } from "antd";
 import { TaskContext } from "../../context/TaskContext";
 import { useParams, useRouter } from "next/navigation";
 import { AuthContext } from "@/app/context/AuthContext";
+import CreateTaskForm from "../../components/CreateTaskForm"; // Update the path if needed
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -26,11 +28,13 @@ const TaskDetails = () => {
     addComment,
     deleteComment,
     handleDeleteTask,
+    handleUpdateTask,
   } = useContext(TaskContext);
   const { getSessionDetails } = useContext(AuthContext);
   const [task, setTask] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { id } = useParams();
   const router = useRouter();
 
@@ -59,6 +63,12 @@ const TaskDetails = () => {
     router.push("/"); // Redirect to the home page
   };
 
+  const handleEditTask = async (values) => {
+    await handleUpdateTask(id, values);
+    setIsModalVisible(false);
+    fetchTaskById(id).then(setTask); // Refresh task details
+  };
+
   const canDeleteTask = task && getSessionDetails().username === task.createdBy;
 
   return (
@@ -68,24 +78,29 @@ const TaskDetails = () => {
         <Card className="shadow-lg p-6 flex-1">
           <Row gutter={16} align="middle">
             <Col span={12}>
-              <Title level={2}>
-                {task.title}
-              </Title>
+              <Title level={2}>{task.title}</Title>
             </Col>
-            {canDeleteTask && (
-              <Col span={12} className="text-right">
-                <Popconfirm
-                  title="Are you sure you want to delete this task?"
-                  onConfirm={deleteTask}
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  <Button danger>
-                    Delete Task
+            <Col span={12} className="text-right">
+              {canDeleteTask && (
+                <>
+                  <Button
+                    onClick={() => setIsModalVisible(true)}
+                    style={{ borderColor: "#52c41a", color: "#52c41a" }}
+                    className="mr-2"
+                  >
+                    Edit Task
                   </Button>
-                </Popconfirm>
-              </Col>
-            )}
+                  <Popconfirm
+                    title="Are you sure you want to delete this task?"
+                    onConfirm={deleteTask}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button danger>Delete Task</Button>
+                  </Popconfirm>
+                </>
+              )}
+            </Col>
           </Row>
           <div className="space-y-4">
             <Row gutter={16}>
@@ -137,7 +152,7 @@ const TaskDetails = () => {
             renderItem={(comment) => (
               <List.Item
                 actions={[
-                  comment.username == getSessionDetails().username ? (
+                  comment.username === getSessionDetails().username ? (
                     <Popconfirm
                       title="Are you sure you want to delete this comment?"
                       onConfirm={() => handleDeleteComment(comment.id)}
@@ -165,7 +180,7 @@ const TaskDetails = () => {
                   }
                   title={
                     comment.name +
-                    (comment.username == getSessionDetails().username
+                    (comment.username === getSessionDetails().username
                       ? " (You)"
                       : "")
                   }
@@ -191,6 +206,20 @@ const TaskDetails = () => {
           </Button>
         </div>
       </Card>
+
+      {/* Edit Task Modal */}
+      <Modal
+        title="Edit Task"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <CreateTaskForm
+          initialValues={task} // Pass the current task details as initial values
+          onClose={() => setIsModalVisible(false)}
+          onSubmit={handleEditTask} // Pass the handler for form submission
+        />
+      </Modal>
     </div>
   );
 };

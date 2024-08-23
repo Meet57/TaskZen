@@ -6,14 +6,20 @@ import { TaskContext } from '../context/TaskContext'; // Update the path if need
 
 const { Option } = Select;
 
-const CreateTaskForm = ({ onClose }) => {
+const CreateTaskForm = ({ onClose, initialValues, onSubmit }) => {
   const [form] = Form.useForm();
   const { users } = useContext(AuthContext);
-  const { tags, handleCreateTask } = useContext(TaskContext);
+  const { tags } = useContext(TaskContext);
+
+  // Set initial values for the form if provided
+  React.useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
 
   const handleFinish = (values) => {
-    handleCreateTask(values);
-    onClose();
+    onSubmit(values);
   };
 
   const handleClear = () => {
@@ -56,7 +62,7 @@ const CreateTaskForm = ({ onClose }) => {
         />
       </Form.Item>
 
-        {/* Status and Priority Side by Side */}
+      {/* Status and Priority Side by Side */}
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select a status' }]}>
