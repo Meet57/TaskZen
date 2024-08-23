@@ -11,12 +11,12 @@ import {
   List,
   Avatar,
   Popconfirm,
-  Modal,
+  Drawer,
 } from "antd";
 import { TaskContext } from "../../context/TaskContext";
 import { useParams, useRouter } from "next/navigation";
 import { AuthContext } from "@/app/context/AuthContext";
-import CreateTaskForm from "../../components/CreateTaskForm"; // Update the path if needed
+import CreateTaskForm from "../../components/CreateTaskForm"; // Adjust path if needed
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -28,13 +28,13 @@ const TaskDetails = () => {
     addComment,
     deleteComment,
     handleDeleteTask,
-    handleUpdateTask,
   } = useContext(TaskContext);
   const { getSessionDetails } = useContext(AuthContext);
   const [task, setTask] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const { id } = useParams();
   const router = useRouter();
 
@@ -63,13 +63,18 @@ const TaskDetails = () => {
     router.push("/"); // Redirect to the home page
   };
 
-  const handleEditTask = async (values) => {
-    await handleUpdateTask(id, values);
-    setIsModalVisible(false);
-    fetchTaskById(id).then(setTask); // Refresh task details
+  const canDeleteTask = task && getSessionDetails().username === task.createdBy;
+
+  const openDrawer = () => {
+    setEditingTask(task);
+    setDrawerVisible(true);
   };
 
-  const canDeleteTask = task && getSessionDetails().username === task.createdBy;
+  const closeDrawer = () => {
+    setDrawerVisible(false);
+    setEditingTask(null);
+    fetchTaskById(id).then(setTask);
+  };
 
   return (
     <div className="container mx-auto p-4 flex flex-col lg:flex-row gap-8">
@@ -80,27 +85,19 @@ const TaskDetails = () => {
             <Col span={12}>
               <Title level={2}>{task.title}</Title>
             </Col>
-            <Col span={12} className="text-right">
-              {canDeleteTask && (
-                <>
-                  <Button
-                    onClick={() => setIsModalVisible(true)}
-                    style={{ borderColor: "#52c41a", color: "#52c41a" }}
-                    className="mr-2"
-                  >
-                    Edit Task
-                  </Button>
-                  <Popconfirm
-                    title="Are you sure you want to delete this task?"
-                    onConfirm={deleteTask}
-                    okText="Yes"
-                    cancelText="No"
-                  >
-                    <Button danger>Delete Task</Button>
-                  </Popconfirm>
-                </>
-              )}
-            </Col>
+            {canDeleteTask && (
+              <Col span={12} className="text-right">
+                <Popconfirm
+                  title="Are you sure you want to delete this task?"
+                  onConfirm={deleteTask}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button danger>Delete Task</Button>
+                </Popconfirm>
+                <Button onClick={openDrawer} className="ml-2">Edit Task</Button>
+              </Col>
+            )}
           </Row>
           <div className="space-y-4">
             <Row gutter={16}>
@@ -142,9 +139,7 @@ const TaskDetails = () => {
 
       {/* Comment Section */}
       <Card className="shadow-lg p-6 flex-1 lg:max-w-sm">
-        <Title level={4} className="text-center">
-          Comments
-        </Title>
+        <Title level={4} className="text-center">Comments</Title>
         <div className="h-96 overflow-y-auto pr-2">
           <List
             itemLayout="horizontal"
@@ -152,7 +147,7 @@ const TaskDetails = () => {
             renderItem={(comment) => (
               <List.Item
                 actions={[
-                  comment.username === getSessionDetails().username ? (
+                  comment.username == getSessionDetails().username ? (
                     <Popconfirm
                       title="Are you sure you want to delete this comment?"
                       onConfirm={() => handleDeleteComment(comment.id)}
@@ -180,7 +175,7 @@ const TaskDetails = () => {
                   }
                   title={
                     comment.name +
-                    (comment.username === getSessionDetails().username
+                    (comment.username == getSessionDetails().username
                       ? " (You)"
                       : "")
                   }
@@ -207,19 +202,16 @@ const TaskDetails = () => {
         </div>
       </Card>
 
-      {/* Edit Task Modal */}
-      <Modal
+      {/* Edit Task Drawer */}
+      <Drawer
         title="Edit Task"
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
+        placement="right"
+        onClose={closeDrawer}
+        open={drawerVisible}
+        width={700}
       >
-        <CreateTaskForm
-          initialValues={task} // Pass the current task details as initial values
-          onClose={() => setIsModalVisible(false)}
-          onSubmit={handleEditTask} // Pass the handler for form submission
-        />
-      </Modal>
+        {editingTask && <CreateTaskForm onClose={closeDrawer} initialValues={editingTask} />}
+      </Drawer>
     </div>
   );
 };

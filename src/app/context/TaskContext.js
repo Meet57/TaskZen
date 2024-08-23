@@ -73,6 +73,7 @@ export const TaskProvider = ({ children }) => {
 
   const handleUpdateTask = async (taskId, updates) => {
     try {
+      console.log(taskId, updates);
       const updatedTask = await updateTask(taskId, updates);
       setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
