@@ -45,6 +45,15 @@ export const AuthProvider = ({ children }) => {
     validateSession();
   }, []);
 
+  const getSessionDetails = () => {
+    const session = sessionStorage.getItem('auth');
+    if (session) {
+      const authData = JSON.parse(session);
+      return authData.user;
+    }
+    return null;
+  };
+
   const handleLogin = async (email, password) => {
     setLoading(true);
     try {
@@ -117,6 +126,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         loading,
         users,
+        getSessionDetails,
         userDetails,
         handleLogin,
         handleLogout,

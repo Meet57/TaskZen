@@ -27,35 +27,45 @@ export const TaskProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const taskList = await fetchTasks();
-        setTasks(taskList);
-
-        const allTags = taskList.reduce((acc, task) => {
-          task.tags.forEach((tag) => {
-            if (!acc.includes(tag)) {
-              acc.push(tag);
-            }
-          });
-          return acc;
-        }, []);
-
-        setTags(allTags);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadTasks();
   }, []);
 
+  const getSessionDetails = () => {
+    const session = sessionStorage.getItem('auth');
+    if (session) {
+      const authData = JSON.parse(session);
+      return authData.user;
+    }
+    return null;
+  };
+
+  const loadTasks = async () => {
+    try {
+      const taskList = await fetchTasks();
+      setTasks(taskList);
+
+      const allTags = taskList.reduce((acc, task) => {
+        task.tags.forEach((tag) => {
+          if (!acc.includes(tag)) {
+            acc.push(tag);
+          }
+        });
+        return acc;
+      }, []);
+
+      setTags(allTags);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateTask = async (taskData) => {
     try {
+      taskData.createdBy = getSessionDetails().username;
       const newTask = await createTask(taskData);
-      setTasks([...tasks, newTask]);
+      loadTasks();
     } catch (error) {
       setError(error.message);
     }
@@ -98,19 +108,12 @@ export const TaskProvider = ({ children }) => {
   const handleAddComment = async (taskId, commentText) => {
     try {
       const user = JSON.parse(sessionStorage.getItem("auth"));
-      console.log({
-        taskId,
-        commentText,
-        name: user.username,
-        nname: user.name,
-      });
       const updatedTask = await addComment(
         taskId,
         commentText,
         user.user.username,
         user.user.name
       );
-      setTasks(tasks.map((task) => (task.id === taskId ? updatedTask : task)));
     } catch (error) {
       setError(error.message);
     }

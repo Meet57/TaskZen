@@ -9,9 +9,10 @@ const { Option } = Select;
 const CreateTaskForm = ({ onClose }) => {
   const [form] = Form.useForm();
   const { users } = useContext(AuthContext);
-  const { tags } = useContext(TaskContext);
+  const { tags, handleCreateTask } = useContext(TaskContext);
 
   const handleFinish = (values) => {
+    handleCreateTask(values);
     onClose();
   };
 
@@ -60,18 +61,18 @@ const CreateTaskForm = ({ onClose }) => {
         <Col span={12}>
           <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select a status' }]}>
             <Select placeholder="Select status">
-              <Option value="todo">To Do</Option>
-              <Option value="in_progress">In Progress</Option>
-              <Option value="done">Done</Option>
+              <Option value="To Do">To Do</Option>
+              <Option value="In Progress">In Progress</Option>
+              <Option value="Done">Done</Option>
             </Select>
           </Form.Item>
         </Col>
         <Col span={12}>
           <Form.Item label="Priority" name="priority" rules={[{ required: true, message: 'Please select a priority' }]}>
             <Select placeholder="Select priority">
-              <Option value="high">High</Option>
-              <Option value="medium">Medium</Option>
-              <Option value="low">Low</Option>
+              <Option value="High">High</Option>
+              <Option value="Medium">Medium</Option>
+              <Option value="Low">Low</Option>
             </Select>
           </Form.Item>
         </Col>
