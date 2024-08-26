@@ -63,7 +63,7 @@ const TaskDetails = () => {
     router.push("/"); // Redirect to the home page
   };
 
-  const canDeleteTask = task && getSessionDetails().username === task.createdBy;
+  const canDeleteTask = task && getSessionDetails()?.username === task?.createdBy;
 
   const openDrawer = () => {
     setEditingTask(task);
@@ -147,7 +147,7 @@ const TaskDetails = () => {
             renderItem={(comment) => (
               <List.Item
                 actions={[
-                  comment.username == getSessionDetails().username ? (
+                  comment?.username == getSessionDetails()?.username ? (
                     <Popconfirm
                       title="Are you sure you want to delete this comment?"
                       onConfirm={() => handleDeleteComment(comment.id)}

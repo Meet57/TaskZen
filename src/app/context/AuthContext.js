@@ -57,10 +57,14 @@ export const AuthProvider = ({ children }) => {
   const handleLogin = async (email, password) => {
     setLoading(true);
     try {
-      const authData = await login(email, password);
-      setUser(authData.user);
+      const authData = await login(email, password);      
+      setUser(authData.record);
       setIsAuthenticated(true);
       sessionStorage.setItem('auth', JSON.stringify(authData));
+      notification.success({
+        message: 'Login Success',
+        description: 'You have successfully logged in.',
+      });
       if (router) router.push('/');
     } catch (error) {
       notification.error({
