@@ -8,7 +8,7 @@ services:
     depends_on:
       - pocketbase
     environment:
-      - POCKETBASE_URL=http://pocketbase:8090
+      - POCKETBASE_URL=http://pocketbase:8090 # PocketBase internal URL
     volumes:
       - .:/app
     command: npm run dev
@@ -16,7 +16,7 @@ services:
   pocketbase:
     image: pocketbase/pocketbase:latest
     volumes:
-      - ./pb_data:/pb_data
+      - ./pb_data:/pb_data # Persist PocketBase data
     ports:
       - '8090:8090'
     command: serve --http=0.0.0.0:8090 --dir /pb_data

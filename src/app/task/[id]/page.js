@@ -29,7 +29,7 @@ const TaskDetails = () => {
     deleteComment,
     handleDeleteTask,
   } = useContext(TaskContext);
-  const { getSessionDetails } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [task, setTask] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
@@ -63,7 +63,7 @@ const TaskDetails = () => {
     router.push("/"); // Redirect to the home page
   };
 
-  const canDeleteTask = task && getSessionDetails()?.username === task?.createdBy;
+  const canDeleteTask = task && user?.username === task?.createdBy;
 
   const openDrawer = () => {
     setEditingTask(task);
@@ -147,10 +147,10 @@ const TaskDetails = () => {
             renderItem={(comment) => (
               <List.Item
                 actions={[
-                  comment?.username == getSessionDetails()?.username ? (
+                  comment?.username == user?.username ? (
                     <Popconfirm
                       title="Are you sure you want to delete this comment?"
-                      onConfirm={() => handleDeleteComment(comment.id)}
+                      onConfirm={() => handleDeleteComment(comment?.id)}
                       okText="Yes"
                       cancelText="No"
                     >
@@ -164,8 +164,8 @@ const TaskDetails = () => {
                 <List.Item.Meta
                   avatar={
                     <Avatar>
-                      {comment.name
-                        ? comment.name
+                      {comment?.name
+                        ? comment?.name
                             .split(" ")
                             .slice(0, 2)
                             .map((name) => name[0])
@@ -174,12 +174,12 @@ const TaskDetails = () => {
                     </Avatar>
                   }
                   title={
-                    comment.name +
-                    (comment.username == getSessionDetails().username
+                    comment?.name +
+                    (comment?.username == user?.username
                       ? " (You)"
                       : "")
                   }
-                  description={comment.content}
+                  description={comment?.content}
                 />
               </List.Item>
             )}
@@ -188,7 +188,7 @@ const TaskDetails = () => {
         <div className="mt-4">
           <TextArea
             rows={1}
-            placeholder="Add a comment..."
+            placeholder="Add a comment?..."
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
           />

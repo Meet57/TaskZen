@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
         if (session) {
           setUser(session.user);
           setIsAuthenticated(true);
+          sessionStorage.setItem('auth', JSON.stringify(session));
         }
-        sessionStorage.setItem('auth', JSON.stringify(session));
       } catch (error) {
         console.error('Failed to validate session:', error);
       } finally {
