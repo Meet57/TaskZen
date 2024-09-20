@@ -14,7 +14,7 @@ services:
     command: npm run dev
 
   pocketbase:
-    image: pocketbase/pocketbase:latest
+    image: adrianmusante/pocketbase:latest
     volumes:
       - ./pb_data:/pb_data # Persist PocketBase data
     ports:

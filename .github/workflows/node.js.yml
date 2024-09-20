@@ -25,4 +25,4 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: |
-        touch .env
+        docker-compose up -d
